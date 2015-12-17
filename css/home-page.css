@@ -1,0 +1,56 @@
+h1 {
+    color: #D7D7D7;
+}
+
+p {
+    color: #D7D7D7;
+}
+
+body {
+    background-color: #1F1F1F;
+    color: #D7D7D7;
+    font-family: "Open Sans";
+}
+
+.panel{
+   margin:0px 0 20px 0;
+   border:none;
+   background-color:#3D3D3D;
+   color: #D7D7D7;
+   border-radius: 25px;
+}
+
+.panel p{
+    font-family: "Open Sans";
+	font-weight:lighter;
+    color: #D7D7D7;
+    font-size: 20px;
+    height: 100%;
+}
+
+.crop {
+
+    height: 200px;
+    overflow: hidden;
+}
+
+.crop img {
+    height: 250px;
+    width: auto;
+    overflow: hidden;
+}
+
+#bigPhotoArea{
+   background-size: contain;
+   background-repeat: no-repeat;
+   background-position:center;
+   height: 100%;
+}
+
+#bigPhotoArea img{
+    margin-top:2%;
+    max-width: 100%;
+    max-height: 100%;
+    height: auto;
+}
+

@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Walty</title>
+    <link rel="stylesheet" href="foundation/css/foundation.css" />
+    <link rel="stylesheet" href="css/home-page.css"/>
+    <link rel="stylesheet" href="foundation/foundation-icons/foundation-icons.css" />
+    <link rel="shortcut icon" type="image/png" href="img/favicon.png"/>
+    <script src="foundation/js/vendor/modernizr.js"></script>
+    <script src="foundation/js/vendor/jquery.js"></script> 
+    <script src="foundation/js/foundation/foundation.js"></script> 
+    <script src="foundation/js/foundation/foundation.reveal.js"></script>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,300,700' rel='stylesheet' type='text/css'>
+
+</head>
+    
+<body>
+
+    <div id="homeScreen">
+        <div class='row' style="margin-bottom: 3%">
+            <a href="#" onClick="openSearchModal()"><i class="fi-magnifying-glass" style="font-size:80px; color:#D7D7D7; margin-top:2%; margin-left:2%"></i></a>                    
+            <img src="img/logo.png" style="height:100px; float:right; margin-right: 2%; margin-top:2%; ">
+        </div> 
+
+
+        <div class="row">
+            <a class="small-4 large-4 columns" href="#" onClick="submitSearch('civil')">
+                <div class="panel">
+                    <div class='crop'><img src="img/skyscraper-1-1523706-1600x1200.jpg"></div>
+                    <p class="text-center">Civil</p>
+                </div>
+            </a>
+            <a class="small-4 large-4 columns" href="#" onClick="submitSearch('mechanical')">
+                <div class="panel">
+                    <div class='crop'><img src="img/gears-4-1566682.jpg"></div>
+                    <p class="text-center">Mechanical</p>
+                </div>
+            </a>
+            <a class="small-4 large-4 columns" href="#" onClick="submitSearch('electrical')">
+                <div class="panel">
+                    <div class='crop'><img src="img/circuit-board.jpg"></div>
+                    <p class="text-center">Electrical</p>
+                </div>
+            </a>
+        </div>
+
+        <div class="row">
+            <a class="small-4 large-4 columns" href="#" onClick="submitSearch('software')">
+                <div class="panel">
+                    <div class='crop'><img src="img/code-1243504-1600x1200.jpg"></div>
+                    <p class="text-center">Software</p>
+                </div>
+            </a>
+            <a class="small-4 large-4 columns" href="#" onClick="submitSearch('id')">
+                <div class="panel">
+                    <div class='crop'><img src="img/film-case-1456210-1280x960.jpg"></div>
+                    <p class="text-center">ID</p>
+                </div>
+            </a>
+            <a class="small-4 large-4 columns" href="#" onClick="submitSearch('people')">
+                <div class="panel">
+                    <div class='crop'><img src="img/people-1458971.jpg"></div>
+                    <p class="text-center">People</p>
+                </div>
+            </a>
+        </div>
+        <a href='setup.html'><p class='text-center' style="margin-top:5%""><i class="fi-widget" style="font-size:50px; color:#5F5F5F;"></i></p></a>         
+            
+    </div>
+    
+    <div id="resultsScreen" style="display:none;">
+        <div class='row' style="margin-bottom:2%">
+            <a href="#" onClick="openSearchModal()"><i class="fi-magnifying-glass" style="font-size:80px; color:#D7D7D7; margin-top:2%; margin-left:2%"></i></a>          
+            <a href="#" onClick="gotoHomeScreen()"><i class="fi-arrow-left" style="font-size:80px; color:#D7D7D7; margin-top:2%; margin-left:2%"></i></a>          
+            <img src="img/logo.png" style="height:100px; float:right; margin-right: 2%; margin-top:2%">
+        </div> 
+        <div id ="searchResults">Results</div>         
+    
+    </div>
+    
+    <div id="photoScreen" style="display:none; height:100%">        
+      <a href="#" onClick="gotoResultsScreen()"><i class="fi-arrow-left" style="position: fixed; font-size:80px; color:#A7A7A7; margin-top:2%; margin-left:2%"></i></a>          
+      <div id="bigPhotoArea"></div>
+    </div>
+    
+    <div id="fullscreenCheckModal" class="reveal-modal small" data-reveal aria-labelledby="modalTitle" aria-hidden="true" role="dialog">
+        <h2 class="text-center">This app would like to go fullscreen. </h2>
+        <div class="large-6 columns">
+            <div class="button round alert expand" onClick="okFullscreen()">OK</div>
+        </div>
+        <div class="large-6 columns">
+            <div class="button round expand" onClick="noFullscreen()">Nope</div>
+        </div>
+    </div>
+    
+    <div id="searchModal" class="reveal-modal" data-reveal aria-labelledby="modalTitle" aria-hidden="true" role="dialog">
+        <div class="small-8 large-4 columns small-centered">
+            <a href="#" onClick="submitSearch()" class="button large round alert expand" style="font-size:40px; margin-top:40px"" id="searchButton"> search </a>
+        </div>
+        <div id="tagsArea"></div>
+        <a class="close-reveal-modal" aria-label="Close"><i class="fi-x" style="font-size:80px; color:#D7D7D7; "></i></a>
+    </div>
+    
+    
+    
+    
+</body>
+ 
+<script>
+
+
+
+// Find the right method, call on correct element
+function launchIntoFullscreen(element) {
+  if(element.requestFullscreen) {
+    element.requestFullscreen();
+  } else if(element.mozRequestFullScreen) {
+    element.mozRequestFullScreen();
+  } else if(element.webkitRequestFullscreen) {
+    element.webkitRequestFullscreen();
+  } else if(element.msRequestFullscreen) {
+    element.msRequestFullscreen();
+  }
+}
+
+function toggleHomeScreen() {
+    $("#homeScreen").toggle();
+}
+
+function gotoHomeScreen() {
+    $("#resultsScreen").hide();
+    $("#homeScreen").show();
+}
+
+function gotoResultsScreen() {
+    $("#photoScreen").hide();
+    $("#resultsScreen").show();
+}
+
+function okFullscreen() {
+    $('#fullscreenCheckModal').foundation('reveal', 'close');
+    launchIntoFullscreen(document.documentElement);
+}
+
+function noFullscreen() {
+    $('#fullscreenCheckModal').foundation('reveal', 'close');
+}
+
+function submitSearch(keyword) {
+
+      if(keyword)
+         searchTags.push(keyword);
+
+     $.ajax({
+         type: "POST",
+         url: "search-tags.php",
+         data: {'tags':JSON.stringify(searchTags)},
+         dataType: "json",
+         beforeSend: function(html) {
+             $('#searchModal').foundation('reveal', 'close');
+             $("#searchResults").html(''); 
+             $("#homeScreen").hide();
+             $("#resultsScreen").show();
+         },
+         success: function(data){
+             html = data.html;
+             $("#searchResults").show();
+             $("#searchResults").append(html);
+         },
+ //        error: function(html){
+ //            alert("Error in search.");
+ //            $("#searchResults").append(html);
+ //        } 
+         error: function(xhr, status, error) {
+         alert(xhr);
+         alert(status);
+         alert(error);
+           //var err = eval("(" + xhr.responseText + ")");
+           //alert(err.Message);
+}         
+     });    
+   searchTags = [];
+   return false;
+};
+
+function viewPhoto(path) {  
+   $("#resultsScreen").hide();
+   $("#bigPhotoArea").empty();
+   $("#bigPhotoArea").css("background-image","url("+path+")");
+   $("#photoScreen").show();
+   
+}
+
+$( document ).ready(function() {
+    $('#fullscreenCheckModal').foundation('reveal', 'open');        
+});
+
+function openSearchModal() {
+
+   searchTags = [];
+   $.ajax({
+      type: "GET",
+      url: "get-tags.php",
+      success: function(html){
+         $('#searchModal').foundation('reveal', 'open');
+         $(document).on('opened.fndtn.reveal', '[data-reveal]', function () {
+            $("#tagsArea").empty();
+            $("#tagsArea").append(html);
+         });
+      },
+      error: function(html){
+          alert("Error getting tags.");
+      }  
+   }); 
+}
+
+function toggleTagButton(tag) {	
+
+   state = $("#tagButton"+tag).css('font-style');
+   if (state=='italic') {
+      searchTags = jQuery.grep(searchTags, function(value) {
+        return value != tag;
+      });
+      $("#tagButton"+tag).css('background','#E7E7E7');
+      $("#tagButton"+tag).css('font-style','normal');
+   } else {
+      searchTags.push(tag);
+      $("#tagButton"+tag).css('background','#43AC6A');
+      $("#tagButton"+tag).css('font-style','italic');  
+   }
+}
+
+</script>
+
+<script type="text/javascript"> 
+   $(document).foundation();
+   searchTags = [];
+</script>
+
+
+
+</html>

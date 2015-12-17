@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Walty Setup</title>
+    <link rel="shortcut icon" type="image/png" href="img/favicon.png"/>
+    <link rel="stylesheet" href="foundation/css/foundation.css" />
+    <link rel="stylesheet" href="css/setup-page.css"/>
+    <link rel="stylesheet" href="foundation/foundation-icons/foundation-icons.css" />
+    <script src="foundation/js/vendor/modernizr.js"></script>
+    <script src="foundation/js/vendor/jquery.js"></script> 
+    <script src="foundation/js/foundation/foundation.js"></script> 
+    <script src="foundation/js/foundation/foundation.reveal.js"></script>
+    <script src="/js/jquery.form.js"></script> 
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,300,700' rel='stylesheet' type='text/css'>
+
+</head>
+    
+<body>
+   <div style="position:fixed; top:0; height:130px; width: 100%; z-index:100; background-color: rgba(255,128,128,0.9);">
+      <div class='row' style="margin-bottom:2%; background-color=red">
+         <a href="index.html"><i class="fi-home" style="font-size:80px; margin-top:2%; margin-left:2%"></i></a> 
+         <a href="#" onClick="openUploadModal()"><i class="fi-plus" style="font-size:80px; margin-top:2%; margin-left:2%"></i></a>             
+         <img src="img/logo.png" style="height:100px; float:right; margin-right: 2%; margin-top:2%">
+      </div>
+   </div>
+   
+   <div> <a href='#' onClick='debugging()' style='display:none' class='button'>Debug</a></div>
+   
+   <div id="photosScreen" style='margin-top:200px'></div>
+   
+   <div id="uploadModal" class="reveal-modal" data-reveal aria-labelledby="modalTitle" aria-hidden="true" role="dialog">
+      <div class='small-10 small-centered columns' style="margin-bottom: 50px">
+         <form id="myForm" action="upload.php" method="post" enctype="multipart/form-data">
+               <div style="width:100%; margin-bottom: 30px; background:#008CBA"><input type="file" accept=".jpg" size="60" name="myfile"></div>
+               <div id="tagsArea"></div>
+               <div style="width:100%; margin-bottom: 30px; background:#008CBA"><input style="margin-bottom: 10px" type="submit" value="Upload and Tag"></div>
+         </form>
+         <form id="newTagForm">
+            <input name="newTag1" placeholder='add a new tag' style='width: 32.9%; display:inline'>
+            <input name="newTag2" placeholder='add a new tag' style='width: 32.9%; display:inline'>
+            <input name="newTag3" placeholder='add a new tag' style='width: 32.9%; display:inline'> 
+         </form>
+         <div id="progress">
+            <div id="bar"></div>
+            <div id="percent">0%</div >
+         </div>
+         <div id="message"></div>
+      </div>
+      <a class="close-reveal-modal" aria-label="Close"><i class="fi-x" style="font-size:80px; color:#D7D7D7; "></i></a>
+   </div>
+    
+</body>
+ 
+<script>
+function debugging() {
+
+}
+
+function getPhotos() {
+  $.ajax({
+   type: "POST",
+   url: "get-setup-photos.php",
+   dataType: "json",
+   beforeSend: function(html) {
+       $("#photosScreen").empty();
+   },
+   success: function(data){
+       html = data.html;
+       $("#photosScreen").append(html);
+   },
+   error: function(xhr, status, error) {
+      alert(error);
+   }         
+   });
+   return false;
+}
+
+function removeTag(path, tag) {
+   $.ajax({
+      type: "POST",
+      url: "remove-tag.php",
+      data: {'path': path, 'tag': tag},
+      dataType: "json",
+      success: function(data){
+         areaId = path.slice(0,-4);
+         areaId = areaId.replace("./user-images/","");
+         areaId = '#panel_'+areaId;
+         $(areaId).find('#tagArea').empty();
+         html = data.html;
+         $(areaId).find('#tagArea').append(html);           
+      },
+      error: function(xhr, status, error) {
+         alert(error);
+      }         
+   });    
+}
+
+function removeImage(path) {
+   $.ajax({
+      type: "POST",
+      url: "remove-image.php",
+      data: {'path': path},
+      dataType: "json",
+      success: function(data){
+         getPhotos();        
+      },
+      error: function(xhr, status, error) {
+         alert(error);
+      }         
+   });    
+}
+
+function addTags(path) {
+   $.ajax({
+      type: "POST",
+      url: "add-tags.php",
+      data: {'path': path, 'tags': JSON.stringify(uploadTags)},
+      dataType: "json",
+      success: function(data){
+         areaId = path.slice(0,-4);
+         areaId = areaId.replace("./user-images/","");
+         areaId = '#panel_'+areaId;
+         $(areaId).find('#tagArea').empty();
+         html = data.html;
+         $(areaId).find('#tagArea').append(html);
+         closeAllAddTagFields();
+      },
+      error: function(xhr, status, error) {
+         alert(error);
+      }         
+   }); 
+}
+
+function addTag(path) {
+   areaId = path.slice(0,-4);
+   areaId = areaId.replace("./user-images/","");
+   areaId = '#panel_'+areaId;
+   dom = tag = $(areaId).find('#field');
+   tag = $(areaId).find('#field').val();
+   uploadTags = [tag];
+   addTags(path);
+}
+
+function openAddTagField(panel) {
+   closeAllAddTagFields();
+   uploadTags = [];
+   areaId = panel;
+   $(areaId).find('#field').show();
+   $(areaId).find('#field').val('');
+   $(areaId).find('#field').focus();
+   $(areaId).find('#submitButton').show();
+   $(areaId).find('#displayFieldButton').hide();
+   $(areaId).find('#hideFieldButton').show();
+   $(areaId).find('#newTagsArea').show();
+   $(areaId).find('#newTagsArea').css('display', 'inline');         
+   
+   excludedTags = [];
+   $.each($(areaId).find('#tagArea').find('.button'), function(index, tagButton){
+      excludedTags.push(tagButton.innerText);
+   });
+   $.ajax({
+      type: "GET",
+      url: "get-tags-except.php",
+      data: {'excludedTags': JSON.stringify(excludedTags)},
+      dataType: "json",
+      success: function(json){
+         $(areaId).find('#newTagsArea').append(json.html);
+         if(json.html) {
+            $(areaId).find('#submitFromListButton').show();         
+         }
+      },
+      error: function(html){
+          alert("Error getting tags.");
+      }  
+   });
+}
+
+function closeAddTagField(panel) {
+   uploadTags = [];
+   areaId = panel;
+   $(areaId).find('#field').hide();
+   $(areaId).find('#submitButton').hide();
+   $(areaId).find('#displayFieldButton').show();
+   $(areaId).find('#hideFieldButton').hide();
+   $(areaId).find('#newTagsArea').empty();
+   $(areaId).find('#newTagsArea').hide();    
+   $(areaId).find('#submitFromListButton').hide();
+}
+
+function openUploadModal() {
+   uploadTags = [];
+   $("#message").html("");
+   $("#percent").html("0%");
+   $.ajax({
+      type: "GET",
+      url: "get-tags.php",
+      success: function(html){
+         $('#uploadModal').foundation('reveal', 'open');
+         $(document).on('opened.fndtn.reveal', '[data-reveal]', function () {
+            $('#uploadModal').find("#tagsArea").empty();
+            $('#uploadModal').find("#tagsArea").append(html);
+         });
+      },
+      error: function(html){
+          alert("Error getting tags.");
+      }  
+   }); 
+}
+
+function toggleTagButton(tag, buttonDom) {	
+   console.log('in the toggler');
+   console.log(buttonDom);
+   state = $("#tagButton"+tag).css('font-style');
+   if (state=='italic') {
+      uploadTags = jQuery.grep(uploadTags, function(value) {
+        return value != tag;
+      });
+      $(buttonDom).css('background','#E7E7E7');
+      $(buttonDom).css('font-style','normal');
+   } else {
+      uploadTags.push(tag);
+      $(buttonDom).css('background','#43AC6A');
+      $(buttonDom).css('font-style','italic'); 
+   }
+}
+
+function closeAllAddTagFields() {
+   $.each($(document).find('.panel'), function(index, panel){
+      closeAddTagField(panel);
+   });
+}
+
+getPhotos();
+
+
+
+</script>
+
+<script type="text/javascript"> 
+   $(document).foundation();
+   uploadTags = []; 
+</script>
+
+<script>
+$(document).ready(function()
+{
+    var options = { 
+    beforeSend: function() 
+    {
+        $("#progress").show();
+        //clear everything
+        //$("#bar").width('0%');
+        $("#message").html("");
+        $("#percent").html("0%");
+    },
+    uploadProgress: function(event, position, total, percentComplete) 
+    {
+        $("#bar").width(percentComplete+'%');
+        $("#percent").html(percentComplete+'%');
+    },
+    success: function() 
+    {
+        $("#bar").width('100%');
+        $("#percent").html('100%');
+    },
+    complete: function(response) 
+    {
+        responseArray = jQuery.parseJSON(response.responseText);
+        $("#message").html("<font color='green'>"+responseArray.html+"</font>");
+        console.log(responseArray.path);
+        newTag = $("#newTagForm input[name='newTag1']").val();
+        if(newTag){
+            uploadTags.push(newTag);
+        }
+        newTag='';
+        newTag = $("#newTagForm input[name='newTag2']").val();
+        if(newTag){
+            uploadTags.push(newTag);
+        }
+        newTag='';
+        newTag = $("#newTagForm input[name='newTag3']").val();
+        if(newTag){
+            uploadTags.push(newTag);
+        }
+        addTags(responseArray.path);
+        getPhotos();
+        $("#newTagForm input[name='newTag1']").val('');
+        $("#newTagForm input[name='newTag2']").val('');
+        $("#newTagForm input[name='newTag3']").val('');
+        $('#uploadModal').foundation('reveal', 'close');
+        
+    },
+    error: function()
+    {
+        $("#message").html("<font color='red'> ERROR: unable to upload files</font>");
+    }
+ 
+}; 
+     $("#myForm").ajaxForm(options);
+ 
+});
+ 
+</script>
+
+
+
+</html>
